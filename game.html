@@ -52,6 +52,21 @@
     }
     #timer { top: 60px; }
     #score { top: 100px; }
+    #chatLink {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: #1e3a8a;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-size: 1em;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    #chatLink:hover {
+      background: #2563eb;
+    }
   </style>
 </head>
 <body>
@@ -60,6 +75,7 @@
     <div id="timer">Time: 0</div>
     <div id="score">Score: 0</div>
     <div id="player"></div>
+    <a id="chatLink" href="https://chatgpt.com/share/68d92bd9-4dd4-8013-b228-8b8bcaf4d7a3" target="_blank">Open Chat History</a>
   </div>
 
   <script>
