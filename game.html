@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Jump the Obstacles 🦖</title>
+  <style>
+    body {
+      margin: 0;
+      background: #f0fdf4;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+    #gameArea {
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(#e0f2fe, #fef9c3);
+      position: relative;
+      overflow: hidden;
+    }
+    #player {
+      position: absolute;
+      bottom: 20px;
+      left: 50px;
+      width: 50px;
+      height: 50px;
+      background: #16a34a;
+      border-radius: 10px;
+    }
+    .obstacle {
+      position: absolute;
+      bottom: 20px;
+      width: 40px;
+      height: 40px;
+      background: #b91c1c;
+      border-radius: 5px;
+    }
+    #message {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2em;
+      font-weight: bold;
+      color: #1e3a8a;
+    }
+    #timer, #score {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.5em;
+      color: #333;
+    }
+    #timer { top: 60px; }
+    #score { top: 100px; }
+  </style>
+</head>
+<body>
+  <div id="gameArea">
+    <div id="message">Tap or Press SPACE to Jump!</div>
+    <div id="timer">Time: 0</div>
+    <div id="score">Score: 0</div>
+    <div id="player"></div>
+  </div>
+
+  <script>
+    const player = document.getElementById("player");
+    const gameArea = document.getElementById("gameArea");
+    const message = document.getElementById("message");
+    const timerEl = document.getElementById("timer");
+    const scoreEl = document.getElementById("score");
+
+    let isJumping = false;
+    let gameOver = false;
+    let score = 0;
+    let timeSurvived = 0;
+    const winTime = 30; // survive 30 seconds to win
+
+    // Jump function
+    function jump() {
+      if (isJumping || gameOver) return;
+      isJumping = true;
+      let up = 0;
+      let jumpInterval = setInterval(() => {
+        if (up >= 120) {
+          clearInterval(jumpInterval);
+          let downInterval = setInterval(() => {
+            if (up <= 0) {
+              clearInterval(downInterval);
+              isJumping = false;
+            } else {
+              up -= 5;
+              player.style.bottom = 20 + up + "px";
+            }
+          }, 20);
+        } else {
+          up += 5;
+          player.style.bottom = 20 + up + "px";
+        }
+      }, 20);
+    }
+
+    // Spawn obstacles
+    function spawnObstacle() {
+      if (gameOver) return;
+      const obstacle = document.createElement("div");
+      obstacle.classList.add("obstacle");
+      obstacle.style.left = window.innerWidth + "px";
+      gameArea.appendChild(obstacle);
+
+      let moveInterval = setInterval(() => {
+        if (gameOver) {
+          clearInterval(moveInterval);
+          obstacle.remove();
+          return;
+        }
+
+        let obstacleLeft = obstacle.offsetLeft - 5;
+        obstacle.style.left = obstacleLeft + "px";
+
+        // Collision detection
+        const playerRect = player.getBoundingClientRect();
+        const obsRect = obstacle.getBoundingClientRect();
+
+        if (
+          obsRect.left < playerRect.right &&
+          obsRect.right > playerRect.left &&
+          obsRect.top < playerRect.bottom &&
+          obsRect.bottom > playerRect.top
+        ) {
+          gameOver = true;
+          message.textContent = "💀 Game Over!";
+        }
+
+        if (obstacleLeft < -50) {
+          obstacle.remove();
+          clearInterval(moveInterval);
+        }
+      }, 20);
+
+      setTimeout(spawnObstacle, 1000 + Math.random() * 1500);
+    }
+
+    // Timer & score
+    let timer = setInterval(() => {
+      if (!gameOver) {
+        timeSurvived++;
+        score += 1;
+        timerEl.textContent = "Time: " + timeSurvived;
+        scoreEl.textContent = "Score: " + score;
+
+        if (timeSurvived >= winTime) {
+          gameOver = true;
+          message.textContent = "🎉 You Win! You survived 30 seconds!";
+        }
+      }
+    }, 1000);
+
+    // Controls: spacebar (PC)
+    document.addEventListener("keydown", (e) => {
+      if (e.code === "Space") jump();
+    });
+
+    // Controls: tap (mobile)
+    gameArea.addEventListener("touchstart", jump);
+
+    // Start game
+    spawnObstacle();
+  </script>
+</body>
+</html>
